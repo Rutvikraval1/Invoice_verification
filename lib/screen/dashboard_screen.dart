@@ -8,9 +8,6 @@ import '../utils/custColors.dart';
 import '../utils/text_style.dart';
 import '../widget/Scaffold_widget.dart';
 import '../widget/navigate_btn.dart';
-import 'dart:convert';
-import 'dart:io';
-
 class dasboard extends StatefulWidget {
   const dasboard({super.key});
 
@@ -38,16 +35,20 @@ class _dasboardState extends State<dasboard> {
 
   bool isloader=false;
   List<bool> all_check_card=[];
-  List<InvoiceItem> invoice_data =[];
+  List final_invoice_data =[];
   List<bool> check_card=[];
-
   List selected_name=[];
+
+  List Po_number=[];
+  List dummy_Po_number=[];
+  List Table_row_data=[];
   get_invoice_data() async {
    var dataList =  await  Network().loadJsonData();
-    invoice_data= dataList.poPending.cast<InvoiceItem>();
-   selected_name = List<String>.filled( invoice_data.length, '');
-   check_card = List<bool>.filled( invoice_data.length, false);
-   all_check_card = List<bool>.filled( invoice_data.length, false);
+   print(dataList);
+   final_invoice_data = dataList;
+   selected_name = List<String>.filled( final_invoice_data.length, '');
+   check_card = List<bool>.filled( final_invoice_data.length, false);
+   all_check_card = List<bool>.filled( final_invoice_data.length, false);
    isloader=true;
    setState(() {});
   }
@@ -81,16 +82,16 @@ class _dasboardState extends State<dasboard> {
                   activeColor: AppColors.main_red_Color,
                   onChanged:(value){
                     if(value!){
-                      all_check_card = List<bool>.filled( invoice_data.length, true);
-                      check_card=List<bool>.filled( invoice_data.length, true);
-                      for(int i=0;i<invoice_data.length;i++){
-                        selected_name[i]=invoice_data[i].dealerName;
+                      all_check_card = List<bool>.filled( final_invoice_data.length, true);
+                      check_card=List<bool>.filled( final_invoice_data.length, true);
+                      for(int i=0;i<final_invoice_data.length;i++){
+                        selected_name[i]=final_invoice_data[i]['dealerName'];
                       }
                       setState(() {});
                     }else{
-                      all_check_card = List<bool>.filled( invoice_data.length, false);
-                      check_card=List<bool>.filled( invoice_data.length, false);
-                      selected_name = List<String>.filled( invoice_data.length, '');
+                      all_check_card = List<bool>.filled( final_invoice_data.length, false);
+                      check_card=List<bool>.filled( final_invoice_data.length, false);
+                      selected_name = List<String>.filled( final_invoice_data.length, '');
                       print("selected_name");
                       print(selected_name);
                       setState(() {});
@@ -101,7 +102,7 @@ class _dasboardState extends State<dasboard> {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: invoice_data.length,
+                itemCount: final_invoice_data.length,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return  Column(
@@ -128,7 +129,7 @@ class _dasboardState extends State<dasboard> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Text('${invoice_data[index].dealerName} [${invoice_data[index].dealerCode}]',style: text_style.textSize16_main_red_style,overflow: TextOverflow.ellipsis
+                                      child: Text('${final_invoice_data[index]['dealerName']} [${final_invoice_data[index]['dealerCode']}]',style: text_style.textSize16_main_red_style,overflow: TextOverflow.ellipsis
                                         ,maxLines: 2,),
                                     ),
                                     Checkbox(value: check_card[index],
@@ -136,7 +137,7 @@ class _dasboardState extends State<dasboard> {
                                       onChanged:(value){
                                       if(value!){
                                         check_card[index]=value;
-                                        selected_name[index]=invoice_data[index].dealerName;
+                                        selected_name[index]=final_invoice_data[index]['dealerName'];
                                       }else{
                                         check_card[index]=value;
                                         selected_name[index]='';
@@ -147,7 +148,7 @@ class _dasboardState extends State<dasboard> {
                                 ),
                                 SizedBox(height: 8,),
                                 Text('Vendor',style: text_style.textSize12_grey_style,),
-                                Text(invoice_data[index].vender.toString(),style:text_style.textSize13_main_red_style ,),
+                                Text(final_invoice_data[index]['vender'].toString(),style:text_style.textSize13_main_red_style ,),
                                 SizedBox(height: 8,),
                                 IntrinsicHeight(
                                   child: Row(
@@ -157,7 +158,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('PO Number',style:text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].pono.toString(),style:text_style().textSize14_grey400_style ),
+                                            Text(final_invoice_data[index]['pono'].toString(),style:text_style().textSize14_grey400_style ),
                                           ],
                                         ),
                                       ),
@@ -166,7 +167,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('PO Date',style: text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].poDate.toString(),style: text_style.textSize13_main_red_style),
+                                            Text(final_invoice_data[index]['poDate'].toString(),style: text_style.textSize13_main_red_style),
                                           ],
                                         ),
                                       ),
@@ -175,7 +176,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('PO Receive \nDate',textAlign: TextAlign.center,style: text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].poRecDate.toString(),style:text_style.textSize13_main_red_style),
+                                            Text(final_invoice_data[index]['poRecDate'].toString(),style:text_style.textSize13_main_red_style),
                                           ],
                                         ),
                                       ),
@@ -191,7 +192,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('Invoice Number',style:text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].invoiceNo.toString(),style: text_style().textSize14_grey400_style ),
+                                            Text(final_invoice_data[index]['invoiceNo'].toString(),style: text_style().textSize14_grey400_style ),
                                           ],
                                         ),
                                       ),
@@ -200,7 +201,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('Invoice Date',style: text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].invoiceDate.toString(),style: text_style.textSize13_main_red_style),
+                                            Text(final_invoice_data[index]['invoiceDate'].toString(),style: text_style.textSize13_main_red_style),
                                           ],
                                         ),
                                       ),
@@ -216,7 +217,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('Dealer Creation Date',style:text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].survCreatedDate.toString(),style: text_style.textSize13_main_red_style ),
+                                            Text(final_invoice_data[index]['survCreatedDate'].toString(),style: text_style.textSize13_main_red_style ),
                                           ],
                                         ),
                                       ),
@@ -225,7 +226,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('PO Completion Date',style: text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].workComplete.toString(),style: text_style.textSize13_main_red_style),
+                                            Text(final_invoice_data[index]['workComplete'].toString(),style: text_style.textSize13_main_red_style),
                                           ],
                                         ),
                                       ),
@@ -241,7 +242,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('Total Budget(\u{20B9})',style:text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].amount.toString(),style: text_style().textSize14_grey700_style ),
+                                            Text(final_invoice_data[index]['amount'].toString(),style: text_style().textSize14_grey700_style ),
                                           ],
                                         ),
                                       ),
@@ -250,7 +251,7 @@ class _dasboardState extends State<dasboard> {
                                         child: Column(
                                           children: [
                                             Text('Consumed Budget(\u{20B9})',style: text_style().textSize14_grey700_style),
-                                            Text(invoice_data[index].vendorAmount.toString(),style: text_style().textSize14_grey700_style),
+                                            Text(final_invoice_data[index]['vendorAmount'].toString(),style: text_style().textSize14_grey700_style),
                                           ],
                                         ),
                                       ),
@@ -284,15 +285,16 @@ class _dasboardState extends State<dasboard> {
                                         DataColumn(label: Text('Vendor Amt(\u{20B9})'),),
                                       ],
                                       rows: [
-                                        DataRow(
+                                        for(int i=0;i<final_invoice_data[index]['tabledata'].length;i++)
+                                          DataRow(
                                             cells:[
-                                              DataCell(SizedBox(width: 80, child: Text(invoice_data[index].materialName.toString()))),
-                                              DataCell(Text(invoice_data[index].poLineItem.toString())),
-                                              DataCell(Text(invoice_data[index].description.toString())),
-                                              DataCell(Text(invoice_data[index].squareFeet.toString())),
-                                              DataCell(Text(invoice_data[index].amount.toString())),
-                                              DataCell(Text(invoice_data[index].vendorSquareFeet.toString())),
-                                              DataCell(Text(invoice_data[index].vendorAmount.toString())),
+                                              DataCell(SizedBox(width: 80, child: Text(final_invoice_data[index]['tabledata'][i]['type']))),
+                                              DataCell(Text(final_invoice_data[index]['tabledata'][i]['line_no'])),
+                                              DataCell(Text(final_invoice_data[index]['tabledata'][i]['hXw'])),
+                                              DataCell(Text(final_invoice_data[index]['tabledata'][i]['sqft'])),
+                                              DataCell(Text(final_invoice_data[index]['tabledata'][i]['amount'])),
+                                              DataCell(Text(final_invoice_data[index]['tabledata'][i]['vendor_sqft'])),
+                                              DataCell(Text(final_invoice_data[index]['tabledata'][i]['vendor_amt'])),
                                             ]
                                         ),
                                       ],
@@ -301,10 +303,10 @@ class _dasboardState extends State<dasboard> {
                                 ),
 
                                 Text('Last Approved',style: text_style.textSize12_grey_style),
-                                Text(invoice_data[index].lastApproveby.toString(),style: text_style.textSize14_black_style),
+                                Text(final_invoice_data[index]['lastApproveby'].toString(),style: text_style.textSize14_black_style),
                                 SizedBox(height: 10,),
                                 Text('Remark',style: text_style.textSize12_grey_style),
-                                Text(invoice_data[index].remark.toString(),style: text_style.textSize14_black_style)
+                                Text(final_invoice_data[index]['remark'].toString(),style: text_style.textSize14_black_style)
 
                               ],
                             ),
@@ -324,9 +326,9 @@ class _dasboardState extends State<dasboard> {
                                       ontap: (){
                                         print(index);
                                         if(index1==2){
-                                          _launchURL(invoice_data[index].poFile.toString());
+                                          _launchURL(final_invoice_data[index]['poFile']??'');
                                         }else if(index1==3){
-                                          _launchURL(invoice_data[index].invoicePath.toString());
+                                          _launchURL(final_invoice_data[index]['invoicePath']??'');
                                         }else{
                                           ScaffoldMessenger.of(context).showSnackBar(
                                               SnackBar(
